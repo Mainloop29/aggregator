@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Виртуальное окружение uv
+.venv/
+.venv*/
+
+# Переменные окружения (секреты!)
+.env
+.env.*
+
+# IDE
+.idea/
+.vscode/
+
+# Кэши инструментов
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Логи
+*.log
