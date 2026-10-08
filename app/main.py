@@ -5,7 +5,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from fastapi import FastAPI
 
-from app.api.routers import health, sync
+from app.api.routers import events, health, sync
 from app.config import settings
 from app.db.engine import engine
 from app.db.models import Base
@@ -56,3 +56,4 @@ app = FastAPI(
 
 app.include_router(health.router, prefix="/api", tags=["health"])
 app.include_router(sync.router, prefix="/api", tags=["sync"])
+app.include_router(events.router, prefix="/api", tags=["events"])
