@@ -16,5 +16,22 @@ services:
       timeout: 5s
       retries: 10
 
+  api:
+    build: .
+    container_name: aggregator-api
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/aggregator
+      EVENTS_PROVIDER_BASE_URL: ${EVENTS_PROVIDER_BASE_URL:-http://events-provider.dev-2.python-labs.ru}
+      EVENTS_PROVIDER_API_KEY: ${EVENTS_PROVIDER_API_KEY:-}
+      EVENTS_PROVIDER_TIMEOUT: "10.0"
+      SYNC_INTERVAL_HOURS: "24"
+      SEATS_CACHE_TTL: "30"
+      HOSTNAME: http://localhost:8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   pgdata:
