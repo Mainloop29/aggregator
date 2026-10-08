@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class HealthResponse(BaseModel):
@@ -42,3 +42,25 @@ class PaginatedEvents(BaseModel):
 class SeatsResponse(BaseModel):
     event_id: str
     available_seats: list[str]
+
+
+class TicketCreate(BaseModel):
+    """Запрос POST /api/tickets."""
+
+    event_id: str = Field(min_length=1, max_length=64)
+    first_name: str = Field(min_length=1, max_length=100)
+    last_name: str = Field(min_length=1, max_length=100)
+    email: EmailStr
+    seat: str = Field(min_length=1, max_length=50)
+
+
+class TicketResponse(BaseModel):
+    """Ответ POST /api/tickets (201)."""
+
+    ticket_id: str
+
+
+class TicketCancelResponse(BaseModel):
+    """Ответ DELETE /api/tickets/{id}."""
+
+    success: bool

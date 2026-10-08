@@ -5,7 +5,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from fastapi import FastAPI
 
-from app.api.routers import events, health, sync
+from app.api.routers import events, health, sync, tickets
 from app.config import settings
 from app.db.engine import engine
 from app.db.models import Base
@@ -22,7 +22,6 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     logger.info("Application starting up")
 
-    # Создаём таблицы (для dev; в проде — Alembic)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     logger.info("Database tables ensured")
@@ -57,3 +56,4 @@ app = FastAPI(
 app.include_router(health.router, prefix="/api", tags=["health"])
 app.include_router(sync.router, prefix="/api", tags=["sync"])
 app.include_router(events.router, prefix="/api", tags=["events"])
+app.include_router(tickets.router, prefix="/api", tags=["tickets"])
