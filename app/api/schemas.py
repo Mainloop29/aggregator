@@ -37,3 +37,8 @@ class PaginatedEvents(BaseModel):
     next: str | None = None
     previous: str | None = None
     results: list[EventListItem]
+
+
+class SeatsResponse(BaseModel):
+    event_id: str
+    available_seats: list[str]
