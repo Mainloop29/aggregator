@@ -1,11 +1,15 @@
 import logging
 from contextlib import asynccontextmanager
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.interval import IntervalTrigger
 from fastapi import FastAPI
 
-from app.api.routers import health
+from app.api.routers import health, sync
+from app.config import settings
 from app.db.engine import engine
 from app.db.models import Base
+from app.worker import run_sync_job
 
 logging.basicConfig(
     level=logging.INFO,
@@ -18,16 +22,30 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     logger.info("Application starting up")
 
-    # Создаём таблицы, если их нет (для dev; в проде — Alembic)
+    # Создаём таблицы (для dev; в проде — Alembic)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     logger.info("Database tables ensured")
 
-    yield
+    # Планировщик: синхронизация раз в N часов
+    scheduler = AsyncIOScheduler(timezone="UTC")
+    scheduler.add_job(
+        run_sync_job,
+        trigger=IntervalTrigger(hours=settings.sync_interval_hours),
+        id="event_sync",
+        replace_existing=True,
+        max_instances=1,
+        coalesce=True,
+    )
+    scheduler.start()
+    logger.info("Scheduler started: interval=%sh", settings.sync_interval_hours)
 
-    # Закрываем пул соединений при остановке
-    await engine.dispose()
-    logger.info("Application shutting down")
+    try:
+        yield
+    finally:
+        scheduler.shutdown(wait=False)
+        await engine.dispose()
+        logger.info("Application shutting down")
 
 
 app = FastAPI(
@@ -37,3 +55,4 @@ app = FastAPI(
 )
 
 app.include_router(health.router, prefix="/api", tags=["health"])
+app.include_router(sync.router, prefix="/api", tags=["sync"])
