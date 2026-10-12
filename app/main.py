@@ -4,6 +4,8 @@ from contextlib import asynccontextmanager
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 
 from app.api.routers import events, health, sync, tickets
 from app.config import settings
@@ -52,6 +54,13 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+
+@app.exception_handler(RequestValidationError)
+async def _validation_handler(request, exc):
+    """Ошибки валидации Pydantic возвращаем с кодом 400 (по контракту LMS)."""
+    return JSONResponse(status_code=400, content={"detail": exc.errors()})
+
 
 app.include_router(health.router, prefix="/api", tags=["health"])
 app.include_router(sync.router, prefix="/api", tags=["sync"])
