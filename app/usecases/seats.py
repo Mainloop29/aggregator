@@ -1,3 +1,4 @@
+from app.enum import EventStatus
 from app.errors import EventNotFound, EventNotPublished, ProviderUnavailable
 from app.providers.events_provider import EventsProviderError
 from app.usecases.protocols import (
@@ -5,8 +6,6 @@ from app.usecases.protocols import (
     EventsProviderProtocol,
     SeatsCacheProtocol,
 )
-
-PUBLISHED_STATUS = "published"
 
 
 class GetSeatsUsecase:
@@ -25,7 +24,7 @@ class GetSeatsUsecase:
         if event is None:
             raise EventNotFound(event_id)
 
-        if event.status != PUBLISHED_STATUS:
+        if event.status != EventStatus.PUBLISHED:
             raise EventNotPublished(f"event status={event.status}")
 
         key = f"seats:{event_id}"

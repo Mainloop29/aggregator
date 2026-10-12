@@ -5,10 +5,10 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Event, Place, SyncMetadata, Ticket, utcnow
+from app.enum import EventStatus
 
 
 def _parse_dt(value) -> datetime | None:
-    """Парсит ISO 8601 с провайдера в datetime с таймзоной."""
     if not value:
         return None
     if isinstance(value, datetime):
@@ -19,8 +19,6 @@ def _parse_dt(value) -> datetime | None:
 
 
 class SqlEventRepository:
-    """Работа с таблицей events + связанной places."""
-
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
@@ -62,7 +60,7 @@ class SqlEventRepository:
         event.place_id = place.id if place else event.place_id
         event.event_time = _parse_dt(data.get("event_time")) or event.event_time
         event.registration_deadline = _parse_dt(data.get("registration_deadline"))
-        event.status = data.get("status", event.status or "new")
+        event.status = data.get("status", event.status or EventStatus.NEW.value)
         event.number_of_visitors = int(data.get("number_of_visitors") or event.number_of_visitors or 0)
         event.changed_at = _parse_dt(data.get("changed_at")) or utcnow()
         event.created_at = _parse_dt(data.get("created_at"))

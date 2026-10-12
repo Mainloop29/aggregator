@@ -1,6 +1,7 @@
 import logging
 from datetime import UTC, datetime
 
+from app.enum import EventStatus
 from app.errors import (
     EventInPast,
     EventNotFound,
@@ -21,8 +22,6 @@ from app.usecases.protocols import (
 from app.utils.seats import is_valid_seat
 
 logger = logging.getLogger(__name__)
-
-PUBLISHED_STATUS = "published"
 
 
 class CreateTicketUsecase:
@@ -50,7 +49,7 @@ class CreateTicketUsecase:
         if event is None:
             raise EventNotFound(event_id)
 
-        if event.status != PUBLISHED_STATUS:
+        if event.status != EventStatus.PUBLISHED:
             raise EventNotPublished(f"event status={event.status}")
 
         now = datetime.now(UTC)

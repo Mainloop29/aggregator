@@ -3,6 +3,8 @@ from datetime import UTC, datetime
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
+from app.enum import EventStatus
+
 
 def utcnow() -> datetime:
     return datetime.now(UTC)
@@ -34,7 +36,7 @@ class Event(Base):
     place_id: Mapped[str | None] = mapped_column(ForeignKey("places.id"), nullable=True)
     event_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
     registration_deadline: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    status: Mapped[str] = mapped_column(String(50), default="new", index=True)
+    status: Mapped[str] = mapped_column(String(50), default=EventStatus.NEW.value, index=True)
     number_of_visitors: Mapped[int] = mapped_column(Integer, default=0)
     changed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
     created_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
