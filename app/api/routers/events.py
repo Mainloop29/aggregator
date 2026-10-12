@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.api.deps import get_event_usecase, get_list_events_usecase, get_seats_usecase
-from app.api.schemas import EventListItem, PaginatedEvents, SeatsResponse
+from app.api.schemas import EventDetail, EventListItem, PaginatedEvents, SeatsResponse
 from app.errors import EventNotFound, EventNotPublished, ProviderUnavailable
 from app.usecases.events import GetEventUsecase, ListEventsUsecase
 from app.usecases.seats import GetSeatsUsecase
@@ -31,16 +31,20 @@ async def list_events(
     )
 
 
-@router.get("/events/{event_id}", response_model=EventListItem, summary="Детали события")
+@router.get(
+    "/events/{event_id}",
+    response_model=EventDetail,
+    summary="Детали события",
+)
 async def get_event(
     event_id: str,
     usecase: Annotated[GetEventUsecase, Depends(get_event_usecase)],
-) -> EventListItem:
+) -> EventDetail:
     try:
         event = await usecase.do(event_id)
     except EventNotFound as exc:
         raise HTTPException(status_code=404, detail="Event not found") from exc
-    return EventListItem.model_validate(event)
+    return EventDetail.model_validate(event)
 
 
 @router.get(

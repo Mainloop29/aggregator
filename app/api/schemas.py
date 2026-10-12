@@ -20,6 +20,28 @@ class PlaceSchema(BaseModel):
     address: str | None = None
 
 
+class PlaceDetailSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    name: str
+    city: str | None = None
+    address: str | None = None
+    seats_pattern: str | None = None
+
+
+class EventDetail(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    name: str
+    place: PlaceDetailSchema | None = None
+    event_time: datetime
+    registration_deadline: datetime | None = None
+    status: str
+    number_of_visitors: int
+
+
 class EventListItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
