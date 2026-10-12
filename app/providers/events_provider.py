@@ -2,6 +2,7 @@ import asyncio
 import logging
 from datetime import date, datetime
 from typing import Any
+from urllib.parse import urljoin
 
 import httpx
 
@@ -59,7 +60,9 @@ class EventsProviderClient:
     async def _request(self, method: str, path: str, **kwargs: Any) -> Any:
         if not path.endswith("/"):
             path = f"{path}/"
-        return await self._request_url(method, f"{self._base_url}{path}", **kwargs)
+        base = self._base_url.rstrip("/") + "/"
+        url = urljoin(base, path.lstrip("/"))
+        return await self._request_url(method, url, **kwargs)
 
     async def _request_url(self, method: str, url: str, **kwargs: Any) -> Any:
         retryable = method.upper() in self.IDEMPOTENT_METHODS
